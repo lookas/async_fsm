@@ -12,7 +12,7 @@ logic of the transitions need to be implemented in the Transition trait.
 
 ## Example implementation
 
-```
+```rust
 use async_fsm::*;
 use async_trait::async_trait;
 use log::info;
