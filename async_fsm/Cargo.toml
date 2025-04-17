@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 keywords = ["fsm", "async_fsm", "Async Finite State Machine"]
+description = "Async Finite State Machine"
 repository = "https://github.com/lookas/async_fsm"
 publish = [ "crates.io" ]
 authors = [ "Lukasz Lewinski <lewinskilukas@gmail.com>" ]
