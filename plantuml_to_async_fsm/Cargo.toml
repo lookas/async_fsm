@@ -1,0 +1,8 @@
+[package]
+name = "plantuml_to_async_fsm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+regex = "*"
+askama = "*"
