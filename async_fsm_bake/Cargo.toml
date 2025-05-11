@@ -1,5 +1,5 @@
 [package]
-name = "plantuml_to_async_fsm"
+name = "async_fsm_bake"
 version = "0.1.0"
 edition = "2021"
 
