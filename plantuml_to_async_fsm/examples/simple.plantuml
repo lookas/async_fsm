@@ -1,11 +1,10 @@
 @startuml
 
-[*] --> State1
-State1 --> [*]
-State1 : this is a string
-State1 : this is another string
+[*] --> Idle
+Idle --> [*] : EvOnExit
+Idle : Some notes
 
-State1 -> State2
-State2 --> [*]
+Idle-> Operation : EvOnTouch
+Operation --> Idle : EvOnKeyDown
 
 @enduml
