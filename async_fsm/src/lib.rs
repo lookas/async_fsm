@@ -188,6 +188,7 @@ where
     ///The event processor. It's responsible listen on receive event channel process the event in the current state
     /// and switch into the new state. The state changes are
     pub async fn process(&mut self) {
+        self.on_state_change();
         while let Some(event) = self.event_receiver.recv().await {
             self.register_event(event);
             self.process_event(event).await;
