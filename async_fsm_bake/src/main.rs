@@ -2,7 +2,6 @@ use clap::{arg, command, value_parser};
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
-use std::io::Cursor;
 use std::path::PathBuf;
 
 mod generator;

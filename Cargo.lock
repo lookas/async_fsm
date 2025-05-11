@@ -139,6 +139,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "async_fsm_bake"
+version = "0.1.0"
+dependencies = [
+ "askama",
+ "clap",
+ "regex",
+]
+
+[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -366,15 +375,6 @@ name = "pin-project-lite"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b3cff922bd51709b605d9ead9aa71031d81447142d828eb4a6eba76fe619f9b"
-
-[[package]]
-name = "plantuml_to_async_fsm"
-version = "0.1.0"
-dependencies = [
- "askama",
- "clap",
- "regex",
-]
 
 [[package]]
 name = "proc-macro2"

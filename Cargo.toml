@@ -1,5 +1,5 @@
 [workspace]
-members = ["async_fsm", "example", "plantuml_to_async_fsm"]
+members = ["async_fsm", "example", "async_fsm_bake"]
 resolver = "2"
 
 [workspace.dependencies]
