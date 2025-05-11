@@ -1,114 +1,51 @@
-use regex::Regex;
-use std::collections::HashSet;
-use std::collections::HashMap;
+use clap::{arg, command, value_parser};
+use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 use std::io::Cursor;
-use std::io::Lines;
-use std::io::Read;
-use askama::Template;
+use std::path::PathBuf;
 
-#[derive(Default)]
-struct Uml {
-    states: HashSet<String>,
-    events: HashSet<String>,
-    // source state, Vec<(event, dest state);
-    transitions: HashMap<String, Vec<(String, String)>>,
-}
-
-impl Uml {
-    fn parse<R: Read>(&mut self, mut lines: Lines<BufReader<R>>) {
-        while let Some(Ok(line)) = lines.next() {
-            self.parse_line(&line);
-        }
-    }
-
-    fn add_transition(&mut self, from: &String, event: &String, to: &String) {
-        if let Some(transition) = self.transitions.get_mut(from) {
-            transition.push((event.clone(), to.clone()));
-        } else {
-            let mut v = Vec::<(String, String)>::new();
-            v.push((event.clone(), to.clone()));
-            self.transitions.insert(from.clone(), v);
-        }
-    }
-    fn add_state(&mut self, state: &String) {
-        if !self.states.contains(state) {
-            self.states.insert(state.clone());
-        } 
-    }
-
-    fn parse_line(&mut self, line: &String) {
-        let start_point_regex = Regex::new(r"\[\*\]\s*-+>\s*(?<start_point>\S+)").unwrap();
-        if let Some(caps) = start_point_regex.captures(line) {
-            let start_point = &caps["start_point"];
-            println!("Found start point: {:?}", start_point);
-            self.add_state(&start_point.to_string());
-            return;
-        }
-
-        let end_point_regex =
-            Regex::new(r"\s*(?<end_point>\S+)\s*-+>\s*\[\*\]").unwrap();
-        if let Some(caps) = end_point_regex.captures(line) {
-            let end_point = &caps["end_point"];
-            println!("Found end point: {:?}", end_point);
-            self.add_state(&end_point.to_string());
-            return;
-        }
-
-        let transition_regex =
-            Regex::new(r"(?<from>\S+)\s*-+>\s*(?<to>\S+)\s*:\s*(?<event>\S+)").unwrap();
-        if let Some(caps) = transition_regex.captures(line) {
-            let from = &caps["from"];
-            let to = &caps["to"];
-            let event = &caps["event"];
-            println!(
-                "Found transition point: {:?} => {:?}, event: {:?}",
-                from, to, event
-            );
-            self.add_state(&from.to_string());
-            self.add_state(&to.to_string());
-            self.events.insert(event.to_string());
-            self.add_transition(&from.into(), &event.into(), &to.into());
-            return;
-        }
-    }
-}
-
-#[derive(Template)]
-#[template(path = "fsm.txt")]
-struct FsmTemplate {
-    events: HashSet<String>,
-    states: HashSet<String>,
-    transitions: HashMap<String, Vec<(String, String)>>
-}
+mod generator;
+mod parser;
 
 fn main() {
-    let simple_state = r"
-@startuml
+    let matches = command!()
+        .arg(arg!([name] "Optional name to operate on"))
+        .arg(
+            arg!(
+                -i --input <FILE> "Sets a input file with plantuml state machine diagram."
+            )
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .arg(
+            arg!(
+                -o --output <DIR> "Sets a out directory for generated fsm."
+            )
+            .required(true)
+            .value_parser(value_parser!(PathBuf)),
+        )
+        .get_matches();
 
-[*] --> Idle
-Idle --> [*] : EvOnExit
-Idle : Some notes
+    // input and output are required params
+    let input_path = matches.get_one::<PathBuf>("input").unwrap();
+    let output_path = matches.get_one::<PathBuf>("output").unwrap();
 
-Idle-> Operation : EvOnTouch
-Operation --> Idle : EvOnKeyDown
+    let input_file = match File::open(input_path) {
+        Err(err) => {
+            println!("Unable to open input file: {input_path:?}! Error: {err:?}");
+            return;
+        }
+        Ok(f) => f,
+    };
+    let reader = BufReader::new(input_file).lines();
 
-@enduml
-    ";
+    println!("Generating async_fsm from: {:?}", input_path);
 
-    println!("Generating async_fsm from diagram: {}", simple_state);
-
-    //let reader = BufReader::new(File::open(path)).lines();
-    let reader = BufReader::new(Cursor::new(simple_state)).lines();
-
-    let mut parser = Uml::default();
+    let mut parser = parser::Uml::default();
     parser.parse(reader);
 
-    let fsm_template = FsmTemplate {
-        events: parser.events.clone(),
-        states: parser.states.clone(),
-        transitions: parser.transitions.clone()
-    };
-    println!("\nGenerated fsm template:\n```\n{}\n```", fsm_template.render().unwrap());
+    let fsm_main = generator::get_main(&parser.events, &parser.states, &parser.transitions);
+    generator::create_output(&output_path, &fsm_main);
+    println!("Output generated at: {output_path:?}");
 }
