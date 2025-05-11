@@ -34,7 +34,7 @@ pub fn create_output(out: &PathBuf, main_content: &String) {
         println!("Unable to write content to main.rs, error: {err:?}");
     }
 
-    let cargo_toml = include_bytes!("../templates/Cargo.toml");
+    let cargo_toml = include_bytes!("../templates/Cargo.toml.txt");
     let mut cargo_file = std::fs::File::create(out.join("Cargo.toml")).unwrap();
     if let Err(err) = cargo_file.write(cargo_toml) {
         println!("Unable to write content to Cargo.toml, error: {err:?}");
