@@ -10,6 +10,6 @@ categories = ["command-line-utilities"]
 include = ["src", "templates"]
 
 [dependencies]
-regex = "*"
-askama = "*"
+regex = "1.11.1"
+askama = "0.14.0"
 clap = { version = "4.5", features = [ "unstable-doc" ]}
